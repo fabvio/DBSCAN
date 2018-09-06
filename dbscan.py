@@ -8,4 +8,4 @@ cld = gen_cluster_data(225, 10000)
 
 db.fit( cld )
 
-print db.get_labels()
+print(db.get_labels())

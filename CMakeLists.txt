@@ -92,9 +92,9 @@ MESSAGE("CUDA found: ${CUDA_FOUND} CUDA version: ${CUDA_VERSION_STRING}")
 
 endif(${CUDA_FOUND})
 
-# if (${CUDA_FOUND})
-# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} --x cu")
-# endif()
+#if (${CUDA_FOUND})
+#set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_20;-std=c++11;-O2;-DVERBOSE")
+#endif()
 
 add_subdirectory(tests)
 add_subdirectory(tools)
