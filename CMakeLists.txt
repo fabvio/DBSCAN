@@ -54,23 +54,6 @@ add_library(dbscan dbscan.cpp)
 #add_executable(test_dbscan test_dbscan.cpp)
 #target_link_libraries(test_dbscan dbscan)
 
-if (PYTHONLIBS_FOUND AND Boost_FOUND)	
-	include_directories( 
-		${PYTHON_INCLUDE_PATH} 
-	)
-	         
-	ADD_LIBRARY(pydbscan SHARED PyDBSCAN.cpp)
-	target_link_libraries(pydbscan dbscan glog boost_python3 boost_numpy3)
-
-	SET_TARGET_PROPERTIES(pydbscan
-		PROPERTIES
-		    MAJOR_VERSION 1
-		    MINOR_VERSION 0
-		        LIBRARY_OUTPUT_NAME pydbscan
-		        PREFIX ""
-	)
-
-endif(PYTHONLIBS_FOUND AND Boost_FOUND)
 
 # add_executable(vptree main_vptree.cpp)
 
@@ -86,15 +69,33 @@ MESSAGE("CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
 
 find_package(CUDA)
 
-if(${CUDA_FOUND})
-
-MESSAGE("CUDA found: ${CUDA_FOUND} CUDA version: ${CUDA_VERSION_STRING}")
-
-endif(${CUDA_FOUND})
 
 #if (${CUDA_FOUND})
 #set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_20;-std=c++11;-O2;-DVERBOSE")
 #endif()
+
+if (PYTHONLIBS_FOUND AND Boost_FOUND AND ${CUDA_FOUND})
+
+MESSAGE("CUDA found: ${CUDA_FOUND} CUDA version: ${CUDA_VERSION_STRING}")
+
+cuda_add_library(gdbscan nv/g_dbscan.cpp nv/g_dbscan.cu)
+
+
+	include_directories(
+		${PYTHON_INCLUDE_PATH}
+	)
+	ADD_LIBRARY(pydbscan SHARED PyDBSCAN.cpp)
+	target_link_libraries(pydbscan dbscan gdbscan glog boost_python3 boost_numpy3 ${CUDA_LIBRARIES})
+
+	SET_TARGET_PROPERTIES(pydbscan
+		PROPERTIES
+		    MAJOR_VERSION 1
+		    MINOR_VERSION 0
+		        LIBRARY_OUTPUT_NAME pydbscan
+		        PREFIX ""
+	)
+
+endif(PYTHONLIBS_FOUND AND Boost_FOUND AND CUDA_FOUND)
 
 add_subdirectory(tests)
 add_subdirectory(tools)

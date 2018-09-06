@@ -3,6 +3,7 @@
 #include "dbscan.h"
 #include "dbscan_vp.h"
 #include "dbscan_graph.h"
+#include "nv/g_dbscan.h"
 
 using namespace boost::python;
 using namespace clustering;
@@ -282,6 +283,46 @@ private:
     DBSCAN_GRAPH::Ptr m_dbs;
 };
 
+// Code by Fabio Pizzati, 6/9/2018
+class PyGDBSCAN {
+public:
+    PyGDBSCAN( const np::ndarray& d )
+        : m_rows( 0 )
+    {
+        npDataset::Ptr np_dset = boost::make_shared< npDataset >();
+        np_dset->load_ndarray( d );
+
+        m_dbs = boost::make_shared< GDBSCAN >( np_dset );
+        //m_dbs->fit();
+        m_rows = np_dset->rows();
+    }
+
+    const np::ndarray predict( float eps, size_t min_elems )
+    {
+        np::dtype dtype = np::dtype::get_builtin< int32_t >();
+        p::tuple shape = p::make_tuple( m_rows );
+
+        np::ndarray rnd = np::zeros( shape, dtype );
+
+        m_dbs->fit( eps, min_elems );
+
+        m_dbs->predict();
+
+        const GDBSCAN::Labels& labels = m_dbs->get_labels();
+
+        for ( size_t i = 0; i < labels.size(); ++i ) {
+            rnd[i] = labels[i];
+        }
+
+        return rnd;
+    }
+
+private:
+    size_t m_rows;
+    GDBSCAN::Ptr m_dbs;
+};
+
+
 BOOST_PYTHON_MODULE( pydbscan )
 {
     np::initialize();
@@ -304,6 +345,9 @@ BOOST_PYTHON_MODULE( pydbscan )
         .def( "predict", &PyDBSCANgraph::predict )
         .def( "get_Va0", &PyDBSCANgraph::get_Va0 )
         .def( "get_Va1", &PyDBSCANgraph::get_Va1 );
+
+    class_< PyGDBSCAN >( "GDBSCAN", p::init< np::ndarray >() )
+        .def("predict", &PyGDBSCAN::predict);
 
     to_python_converter< DBSCAN::ClusterData, ublas_matrix_to_python, false >();
 }
