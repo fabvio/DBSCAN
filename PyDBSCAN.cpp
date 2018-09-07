@@ -303,9 +303,7 @@ public:
         p::tuple shape = p::make_tuple( m_rows );
 
         np::ndarray rnd = np::zeros( shape, dtype );
-
         m_dbs->fit( eps, min_elems );
-
         m_dbs->predict();
 
         const GDBSCAN::Labels& labels = m_dbs->get_labels();
@@ -322,6 +320,39 @@ private:
     GDBSCAN::Ptr m_dbs;
 };
 
+class PyGDBSCAN_RT {
+public:
+    PyGDBSCAN_RT( const unsigned long max_n, const unsigned long max_p ){
+        m_dbs = boost::make_shared< GDBSCAN_RT >( max_n, max_p );
+        //m_dbs->fit();    
+    }
+
+    const np::ndarray predict(np::ndarray& d, float eps, size_t min_elems )
+    {
+        npDataset::Ptr np_dset = boost::make_shared< npDataset >();
+        np_dset->load_ndarray( d );
+
+        size_t m_rows = np_dset->rows();
+
+        np::dtype dtype = np::dtype::get_builtin< int32_t >();
+        p::tuple shape = p::make_tuple( m_rows );
+
+        np::ndarray rnd = np::zeros( shape, dtype );
+        m_dbs->fit(np_dset, eps, min_elems );
+        m_dbs->predict();
+
+        const GDBSCAN_RT::Labels& labels = m_dbs->get_labels();
+
+        for ( size_t i = 0; i < labels.size(); ++i ) {
+            rnd[i] = labels[i];
+        }
+
+        return rnd;
+    }
+
+private:
+    GDBSCAN_RT::Ptr m_dbs;
+};
 
 BOOST_PYTHON_MODULE( pydbscan )
 {
@@ -349,5 +380,9 @@ BOOST_PYTHON_MODULE( pydbscan )
     class_< PyGDBSCAN >( "GDBSCAN", p::init< np::ndarray >() )
         .def("predict", &PyGDBSCAN::predict);
 
+    class_< PyGDBSCAN_RT >( "GDBSCAN_RT", p::init< unsigned long, unsigned long > ())
+        .def("predict", &PyGDBSCAN_RT::predict);
+
     to_python_converter< DBSCAN::ClusterData, ublas_matrix_to_python, false >();
 }
+

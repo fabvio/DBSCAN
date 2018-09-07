@@ -90,6 +90,50 @@ public:
 
   const double get_predict_time() const { return m_predict_time; }
 };
+
+class GDBSCAN_RT : private boost::noncopyable
+{
+public:
+  typedef std::vector<int32_t> Labels;
+  typedef boost::shared_ptr<GDBSCAN_RT> Ptr;
+
+private:
+  // const Dataset::Ptr m_dset;
+
+  Dataset::Ptr m_dset;
+  float* d_data;
+  size_t vA_max_size;
+  size_t vA_size;
+  int* d_Va0;
+  int* d_Va1;
+  std::vector<int> h_Va0;
+  std::vector<int> h_Va1;
+  int* d_Ea;
+  int* d_Fa;
+  int* d_Xa;
+  double m_fit_time;
+  double m_predict_time;
+  std::vector<bool> core;
+  Labels labels;
+
+  void Va_device_to_host();
+  void Fa_to_host(std::vector<int>& Fa);
+  void Xa_to_host(std::vector<int>& Xa);
+  void Fa_Xa_to_device(const std::vector<int>& Fa, const std::vector<int>& Xa);
+  void breadth_first_search(int i, int32_t cluster, std::vector<bool>& visited);
+
+public:
+  GDBSCAN_RT(const unsigned long max_numbers, const unsigned long max_points);
+  ~GDBSCAN_RT();
+
+  void fit(Dataset::Ptr dset, float eps, size_t min_elems);
+  int32_t predict();
+  const Labels& get_labels();
+
+  const double get_fit_time() const { return m_fit_time; }
+
+  const double get_predict_time() const { return m_predict_time; }
+};
 } // namespace clustering
 
 #endif

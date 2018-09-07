@@ -1,8 +1,11 @@
 import numpy as np
-from pydbscan import gen_cluster_data, GDBSCAN
+from pydbscan import DBSCAN, gen_cluster_data
 
-cld = gen_cluster_data(200, 1000)
-db = GDBSCAN(np.asarray(cld))
+db = DBSCAN()
+db.init( 5.5, 5, 4 )
 
-print(db.predict(0.3, 1 ))
+cld = gen_cluster_data(225, 100)
 
+db.fit( cld )
+
+print(db.get_labels())
