@@ -403,14 +403,9 @@ GDBSCAN_RT::GDBSCAN_RT(const unsigned long max_numbers, const unsigned long max_
 
   LOG(INFO) << "Allocated " << vA_max_size << " bytes on device for d_Xa";
 
-  // Allocation moved from lazy loading
-  /*size_t Ea_size =
-    static_cast<size_t>(h_Va0[h_Va0.size() - 1] + h_Va1[h_Va1.size() - 1]) *
-    sizeof(int);*/
-
-  // TODO
+  // Allocation moved from lazy loading FIXME Calcualte righe amount of memory
   size_t Ea_size =
-    static_cast<size_t>(50000000) *
+    static_cast<size_t>(max_points) *
     sizeof(int);
 
   if (d_Ea) {
