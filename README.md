@@ -1,9 +1,10 @@
+DBSCAN
+======
+
 This fork of the original repository includes a python binding to use GDBSCAN (GPU optimized DBSCAN algorithm) with python, with native numpy support. It is also included a GDBSCAN version, named GDBSCAN_RT, which preallocates GPU memory, it still has some issues but it should save some time if the DBSCAN algorithm should be performed in real time.
 You can find an example usage in ```gdbscan.py```, and the original readme below.
 
-======
-
-DBSCAN
+Original readme
 ======
 
 dbscan.h - DBSCAN C++ Boost OpenMP implementation
